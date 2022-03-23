@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "aksdemogilad-3cb1"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "aksdemogilad-3cb1"
+  template:
+    metadata:
+      labels:
+        app: "aksdemogilad-3cb1"
+    spec:
+      containers:
+        - name: "aksdemogilad-3cb1"
+          image: "giladk1221.azurecr.io/aksdemogilad"
+          ports:
+          - containerPort: 80
