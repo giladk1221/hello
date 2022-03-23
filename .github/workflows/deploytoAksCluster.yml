@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: giladk1221.azurecr.io
+        username: ${{ secrets.acr_giladk1221_username }}
+        password: ${{ secrets.acr_giladk1221_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t giladk1221.azurecr.io/aksdemogilad:${{ github.sha }} --label dockerfile-path=Dockerfile
+        docker push giladk1221.azurecr.io/aksdemogilad:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_aksdemogilad_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep aks-demo-gilad99c3 | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace aks-demo-gilad99c3`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: aks-demo-gilad99c3
+        container-registry-url: giladk1221.azurecr.io
+        container-registry-username: ${{ secrets.acr_giladk1221_username }}
+        container-registry-password: ${{ secrets.acr_giladk1221_password }}
+        secret-name: aksdemogiladdockerauth
+       
+    - uses: azure/k8s-deploy@v1.2
+      with:
+        namespace: aks-demo-gilad99c3
+        manifests: |
+          manifests/deployment-6.yml
+          manifests/service-6.yml
+        images: |
+          giladk1221.azurecr.io/aksdemogilad:${{ github.sha }}
+        imagepullsecrets: |
+          aksdemogiladdockerauth
