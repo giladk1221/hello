@@ -6,8 +6,6 @@ SCRUM-1221: Python hello world app with additional functions.
 
 import datetime
 import random
-import sys
-
 
 def hello_world():
     """Print a basic hello world message."""
