@@ -201,8 +201,8 @@ def main():
     hello_multiline()
     print()
 
-    print("=== Countdown Hello (skipping delay) ===")
-    hello_countdown(0)
+    print("=== Countdown Hello ===")
+    hello_countdown(3)
 
 
 if __name__ == "__main__":
